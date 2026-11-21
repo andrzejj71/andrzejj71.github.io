@@ -225,6 +225,7 @@ h1{font-size:44px;line-height:1.02}
     <button data-k="tpm" aria-pressed="true">Rzuty za 3</button>
     <button data-k="pr" aria-pressed="false">Pkt+Zb</button>
     <button data-k="pa" aria-pressed="false">Pkt+As</button>
+    <button data-k="ra" aria-pressed="false">Zb+As</button>
     <button data-k="pra" aria-pressed="false">Pkt+Zb+As</button>
   </div>
 
@@ -306,8 +307,8 @@ h1{font-size:44px;line-height:1.02}
 
 <script>
 (function(){
-  var K={pts:["Punkty","punktów"],reb:["Zbiórki","zbiórek"],ast:["Asysty","asyst"],tpm:["Rzuty za 3","trójek"],pr:["Punkty + zbiórki","pkt+zb."],pa:["Punkty + asysty","pkt+as."],pra:["Punkty + zbiórki + asysty","pkt+zb.+as."]};
-  var COMBO={pr:['pts','reb'],pa:['pts','ast'],pra:['pts','reb','ast']};
+  var K={pts:["Punkty","punktów"],reb:["Zbiórki","zbiórek"],ast:["Asysty","asyst"],tpm:["Rzuty za 3","trójek"],pr:["Punkty + zbiórki","pkt+zb."],pa:["Punkty + asysty","pkt+as."],pra:["Punkty + zbiórki + asysty","pkt+zb.+as."],ra:["Zbiórki + asysty","zb.+as."]};
+  var COMBO={pr:['pts','reb'],pa:['pts','ast'],pra:['pts','reb','ast'],ra:['reb','ast']};
   function comboOf(p,k){
     var parts=COMBO[k]; if(!parts) return null;
     var arrs=parts.map(function(x){return p.s[x]&&p.s[x][2]}); if(arrs.some(function(a){return !a})) return null;
