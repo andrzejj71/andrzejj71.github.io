@@ -95,6 +95,7 @@ h1{font-size:44px;line-height:1.02}
 .cmp td:first-child{color:var(--mute);width:24%}
 .cmp ul{margin:0;padding-left:16px}
 .cmp .pro li::marker{color:var(--hit)}.cmp .con li::marker{color:var(--miss)}
+.nl{display:grid;gap:8px;margin-top:12px}
 .tabbar{display:flex;gap:8px;margin:0 0 16px}
 .tabbar button{background:transparent;color:var(--text);border:1.5px solid var(--line);border-radius:999px;padding:10px 22px;font:700 16px Barlow,sans-serif;cursor:pointer}
 .tabbar button[aria-selected="true"]{background:var(--gold);border-color:var(--gold);color:var(--bg)}
@@ -222,6 +223,9 @@ h1{font-size:44px;line-height:1.02}
     <button data-k="reb" aria-pressed="false">Zbiórki</button>
     <button data-k="ast" aria-pressed="false">Asysty</button>
     <button data-k="tpm" aria-pressed="true">Rzuty za 3</button>
+    <button data-k="pr" aria-pressed="false">Pkt+Zb</button>
+    <button data-k="pa" aria-pressed="false">Pkt+As</button>
+    <button data-k="pra" aria-pressed="false">Pkt+Zb+As</button>
   </div>
 
   <div class="stat">
@@ -289,7 +293,8 @@ h1{font-size:44px;line-height:1.02}
   <div class="box" id="lineA"></div>
   <h2 id="lb">Przewidywany skład</h2>
   <div class="box" id="lineB"></div>
-</section></div>
+</section>
+<section class="card" id="nextCard"><h2 class="sugh">Mecze następnego dnia</h2><small class="mute" id="nextDate"></small><div class="nl" id="nextList"></div></section></div>
 </div>
 </div>
 <footer class="foot"><details class="upd"><summary>Jak zaktualizować dane</summary>
@@ -301,7 +306,16 @@ h1{font-size:44px;line-height:1.02}
 
 <script>
 (function(){
-  var K={pts:["Punkty","punktów"],reb:["Zbiórki","zbiórek"],ast:["Asysty","asyst"],tpm:["Rzuty za 3","trójek"]};
+  var K={pts:["Punkty","punktów"],reb:["Zbiórki","zbiórek"],ast:["Asysty","asyst"],tpm:["Rzuty za 3","trójek"],pr:["Punkty + zbiórki","pkt+zb."],pa:["Punkty + asysty","pkt+as."],pra:["Punkty + zbiórki + asysty","pkt+zb.+as."]};
+  var COMBO={pr:['pts','reb'],pa:['pts','ast'],pra:['pts','reb','ast']};
+  function comboOf(p,k){
+    var parts=COMBO[k]; if(!parts) return null;
+    var arrs=parts.map(function(x){return p.s[x]&&p.s[x][2]}); if(arrs.some(function(a){return !a})) return null;
+    var n=Math.min.apply(null,arrs.map(function(a){return a.length})), v=[];
+    for(var i=0;i<n;i++){v.push(arrs.reduce(function(s,a){return s+a[a.length-n+i]},0))}
+    var m=v.reduce(function(x,y){return x+y},0)/n;
+    return [Math.floor(m)+0.5, Math.ceil(Math.max.apply(null,v)*1.15), v];
+  }
   var P=[
    {n:"Luka Dončić",ini:"LD",team:"LAL",pos:"rozgrywający",opp:"MIL",time:"20:00 ET",home:false,real:"nba.com + statmuse.com, stan na 11.11.2026",rec:[10,2],
     o:["GSW","LAC","@UTA","POR","@GSW","TOR","MIA","@SAC","POR","@ATL"],
@@ -341,7 +355,7 @@ h1{font-size:44px;line-height:1.02}
       b.querySelector('i').style.height=(v/MAX*85)+'%';
     });
     $('thr').style.bottom=(line/MAX*127.5)+'px';
-    var pOver=1-cdf(Math.floor(line),avg);
+    var pOver=COMBO[key]?1-ncdf((line-avg)/(Math.sqrt(vals.reduce(function(x,y){return x+(y-avg)*(y-avg)},0)/vals.length)||1)):1-cdf(Math.floor(line),avg);
     var p=Math.round((over?pOver:1-pOver)*100);
     $('chance').innerHTML=p+'%<small>szansa</small>';
     $('ring').style.setProperty('--rb','conic-gradient('+(over?'var(--hit)':'var(--miss)')+' '+p+'%, var(--line) 0)');
@@ -355,7 +369,7 @@ h1{font-size:44px;line-height:1.02}
     $('under').setAttribute('aria-pressed',!over);
   }
   function setStat(k){
-    key=k; var d=pl.s[k]; line=d[0]; MAX=d[1]; vals=d[2];
+    key=k; var d=pl.s[k]||comboOf(pl,k); if(!d) return; line=d[0]; MAX=d[1]; vals=d[2];
     avg=vals.reduce(function(a,b){return a+b},0)/vals.length;
     $('avg').textContent=avg.toFixed(1); $('avgLbl').textContent='średnia, ostatnie '+vals.length;
     var ov=pl.ov&&pl.ov[k], last=vals.length-1, noRef=!pl.opp||!!pl.real;
@@ -709,7 +723,7 @@ h1{font-size:44px;line-height:1.02}
     }
     lineup(a,$('#lineA'),'#la'); lineup(b,$('#lineB'),'#lb');
     if(window.__sug) window.__sug(a,b);
-    renderCmp(a,b);
+    renderCmp(a,b); renderNext(a);
   }
   var lm=$('#tdMsg');
   function setData(t,h){T=t;H=h||{};fill(ta.value,tb.value);update()}
@@ -759,6 +773,27 @@ h1{font-size:44px;line-height:1.02}
       row('Ważne kontuzje',function(s){return s.out.length?s.out.join(', '):'brak'},function(s){return s.out.length?s.out.join(', '):'brak'})+
       '<tr><td>Zalety</td><td>'+ul(pa.P,'pro')+'</td><td>'+ul(pb.P,'pro')+'</td></tr>'+
       '<tr><td>Wady</td><td>'+ul(pa.C,'con')+'</td><td>'+ul(pb.C,'con')+'</td></tr></tbody></table>';
+  }
+  function etDate(ts){return new Date(Date.parse(ts)-5*36e5).toISOString().slice(0,10)}
+  function renderNext(a){
+    var box=$('#nextList'), hd=$('#nextDate'); if(!box) return;
+    var SC=(H&&H._schedule)||[]; box.innerHTML='';
+    if(!SC.length){hd.textContent=''; box.innerHTML='<span class="mute">Brak terminarza w danych. Uruchom aktualizację (build_teams_detail.py) i wczytaj nowy plik.</span>'; return}
+    var n=T[a]&&T[a].next, ref=(n&&n.ts)?etDate(n.ts):((n&&n.date)||SC[0].date);
+    var d=new Date(ref+'T12:00:00Z'); d.setUTCDate(d.getUTCDate()+1); var tgt=d.toISOString().slice(0,10);
+    var list=SC.filter(function(g){return g.date===tgt}).sort(function(x,y){return (x.ts||'').localeCompare(y.ts||'')});
+    hd.textContent='Dzień po meczu drużyny '+a+': '+tgt.split('-').reverse().slice(0,2).join('.')+' (czas amerykański), godziny w Twojej strefie czasowej.';
+    if(!list.length){box.innerHTML='<span class="mute">Brak meczów w terminarzu na ten dzień (dane obejmują najbliższe dni).</span>'; return}
+    list.forEach(function(g){
+      var bt=document.createElement('button'); bt.type='button'; bt.className='sugb';
+      bt.innerHTML='<span><b></b><small></small></span><span class="sugp"></span>';
+      bt.querySelector('b').textContent=g.away+' @ '+g.home;
+      bt.querySelector('small').textContent=((T[g.away]&&T[g.away].n)||'')+(T[g.home]?' @ '+T[g.home].n:'');
+      var t=g.ts?new Date(g.ts):null;
+      bt.querySelector('.sugp').textContent=(t&&!isNaN(t))?t.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):'';
+      bt.onclick=function(){if(T[g.home]&&T[g.away]){ta.value=g.home;tb.value=g.away;update(); window.scrollTo({top:0,behavior:'smooth'})}};
+      box.appendChild(bt);
+    });
   }
   function nextOf(a){var n=T[a]&&T[a].next; if(!n) return null; if(n.label&&!n.ts) return {opp:n.opp,home:n.home,time:n.label}; var d=n.ts?new Date(n.ts):null;
     return {opp:n.opp,home:n.home,time:(d&&!isNaN(d))?d.toLocaleDateString('pl-PL',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):''}}
