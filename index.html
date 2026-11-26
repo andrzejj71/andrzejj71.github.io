@@ -6,7 +6,7 @@
 <title>Panel NBA – prototyp</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@500;600&display=swap">
 <style>
-:root{--bg:#111111;--card:#1c1c1c;--line:#333333;--text:#ffffff;--mute:#a9a9a9;--hit:#3dffa0;--miss:#ff6b6b;--gold:#ffffff;--violet:#e60023;color-scheme:dark;
+:root{--bg:#111111;--card:#1c1c1c;--line:#333333;--text:#ffffff;--mute:#c6c6c6;--hit:#3dffa0;--miss:#ff6b6b;--gold:#ffffff;--violet:#e60023;color-scheme:dark;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#ffffff;--card:#f6f6f6;--line:#dcdcdc;--text:#111111;--mute:#767676;--hit:#0f9d5c;--miss:#d63a40;--gold:#111111;--violet:#e60023;color-scheme:light}}
 :root[data-theme="dark"]{color-scheme:dark}
@@ -61,7 +61,8 @@ h1{font-size:44px;line-height:1.02}
 .load{display:flex;gap:10px;align-items:center;margin:14px 4px 0;flex-wrap:wrap}
 .ld{background:transparent;color:var(--text);border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;font:700 15px Barlow,sans-serif;cursor:pointer}
 .ld:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.tabs{display:flex;gap:8px;margin:24px 0 0;flex-wrap:wrap}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:24px 0 0}
+.tabs button{text-align:center;padding:8px 4px!important;font-size:14px!important;white-space:nowrap}
 .tabs button{background:transparent;color:var(--text);border:1.5px solid var(--line);border-radius:10px;padding:7px 14px;font:700 15px Barlow,sans-serif;cursor:pointer}
 .tabs button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--bg)}
 .tabs button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -111,12 +112,20 @@ h1{font-size:44px;line-height:1.02}
 .addp:hover{filter:brightness(1.15)}
 .addp:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .trend b{color:var(--text)}
-.slipform{display:grid;grid-template-columns:1.6fr 1.3fr .8fr 1fr auto;gap:8px;margin:12px 0 6px}
+.slipform{display:grid;grid-template-columns:1.3fr .8fr 1fr auto;gap:8px;margin:12px 0 6px}
+.slipform #slName{grid-column:1/-1}
 .slipform input,.slipform select{width:100%;background:#ffffff0d;color:var(--text);border:1.5px solid var(--line);border-radius:12px;padding:9px 10px;font:600 14px Barlow,sans-serif;min-width:0}
 .slipform option{background:var(--card);color:var(--text)}
 .slipform input:focus-visible,.slipform select:focus-visible{outline:2px solid var(--violet);outline-offset:1px}
-@media (max-width:1300px){.slipform{grid-template-columns:1fr 1fr}}
+@media (max-width:1300px){.slipform{grid-template-columns:1fr 1fr}.slipform #slAdd{grid-column:1/-1}}
 .tp td .x{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:8px;width:28px;height:28px;cursor:pointer}
+#p2 .cavg{font-size:13px;color:var(--text);margin:-2px 0 8px;font-weight:600}
+#p2 .g3{display:grid;gap:8px}
+.modes{display:flex;gap:8px;margin:12px 0 0;flex-wrap:wrap}
+.modes button:not(.addp){background:transparent;color:var(--text);border:1.5px solid var(--line);border-radius:10px;padding:8px 20px;font:700 15px Barlow,sans-serif;cursor:pointer}
+.modes button[aria-pressed="true"]{background:var(--violet);border-color:var(--violet);color:#fff}
+.modes button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#p2 .cavg b{color:var(--text)}
 .tabbar{display:flex;gap:8px;margin:0 0 16px}
 .tabbar button{background:transparent;color:var(--text);border:1.5px solid var(--line);border-radius:999px;padding:10px 22px;font:700 16px Barlow,sans-serif;cursor:pointer}
 .tabbar button[aria-selected="true"]{background:var(--gold);border-color:var(--gold);color:var(--bg)}
@@ -183,7 +192,8 @@ h1{font-size:44px;line-height:1.02}
 #p2 select{width:100%;background:#ffffff0d;color:var(--text);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font:600 16px Barlow,sans-serif}
 #p2 select:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
 #p2 option{background:var(--card);color:var(--text)}
-#p2 .head{display:flex;align-items:center;justify-content:space-around;gap:8px;margin:18px 0 4px;text-align:center}
+#p2 .head{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;justify-items:center;gap:8px;margin:18px 0 8px;text-align:center}
+#p2 .head .vs{align-self:center}
 #p2 .logo{width:156px;height:156px;border-radius:50%;display:grid;place-items:center;font:800 26px "Barlow Condensed",sans-serif;color:#fff;margin:0 auto 6px;border:3px solid #ffffff30}
 #p2 .vs{font:800 24px "Barlow Condensed",sans-serif;color:var(--mute)}
 #p2 .tn{margin-top:8px;font:800 20px "Barlow Condensed",sans-serif;line-height:1.1}
@@ -251,10 +261,15 @@ h1{font-size:44px;line-height:1.02}
     <button data-k="ra" aria-pressed="false">Zb+As</button>
     <button data-k="pra" aria-pressed="false">Pkt+Zb+As</button>
   </div>
+  <div class="modes" role="group" aria-label="Kierunek i kupon">
+    <button id="over" aria-pressed="true">Powyżej</button>
+    <button id="under" aria-pressed="false">Poniżej</button>
+    <button type="button" class="addp" id="addSlip" title="Dodaj aktualnie wybrany typ do kuponu">+ Kupon</button>
+  </div>
 
   <div class="stat">
     <span class="big" id="statName">Rzuty za 3</span>
-    <span class="pill" id="pill">POWYŻEJ 4.5</span><button type="button" class="addp" id="addSlip" title="Dodaj aktualnie wybrany typ do kuponu">+ Kupon</button>
+    <span class="pill" id="pill">POWYŻEJ 4.5</span>
     <div class="ring" id="ring"><span id="chance">64%<small>szansa</small></span></div>
   </div>
 
@@ -270,8 +285,6 @@ h1{font-size:44px;line-height:1.02}
     <button id="minus" aria-label="Obniż linię">−1</button>
     <span class="line" id="lineVal">4.5</span>
     <button id="plus" aria-label="Podnieś linię">+1</button>
-    <button id="over" aria-pressed="true">Powyżej</button>
-    <button id="under" aria-pressed="false">Poniżej</button>
   </div>
 
   <div class="tiles">
@@ -307,6 +320,8 @@ h1{font-size:44px;line-height:1.02}
     <div><label for="qb">Rywal</label><input id="qb" type="search" placeholder="Szukaj rywala, np. Pelicans" autocomplete="off"><ul class="sg" id="gb" hidden></ul><select id="tb" hidden></select></div>
   </div>
   <div class="head" id="head"></div>
+  <h2>Ostatnie H2H</h2>
+  <div class="box h2h" id="h2h"></div>
 
   <h2>Punkty całego meczu</h2>
   <div class="ctrl" id="sw1" role="group" aria-label="Mecze której drużyny"></div>
@@ -318,15 +333,14 @@ h1{font-size:44px;line-height:1.02}
 
   </section>
 </div>
-<div class="col"><section class="card"><h2>Ostatnie H2H</h2>
-  <div class="box h2h" id="h2h"></div>
+<div class="col"><section class="card">
 
   <h2 id="la">Przewidywany skład</h2>
   <div class="box" id="lineA"></div>
   <h2 id="lb">Przewidywany skład</h2>
   <div class="box" id="lineB"></div>
 </section>
-<section class="card" id="nextCard"><h2 class="sugh">Mecze następnego dnia</h2><small class="mute" id="nextDate"></small><div class="nl" id="nextList"></div></section></div>
+</div>
 </div>
 </div>
 <footer class="foot"><details class="upd"><summary>Jak zaktualizować dane</summary>
@@ -649,10 +663,10 @@ h1{font-size:44px;line-height:1.02}
 
   function Chart(el){
     el.className='box';
-    el.innerHTML='<div class="stat"><span class="big" data-t></span><span class="pill" data-p></span><div class="ring" data-r><span data-c></span></div></div>'+
+    el.innerHTML='<div class="stat"><span class="big" data-t></span><span class="pill" data-p></span><div class="ring" data-r><span data-c></span></div></div><div class="cavg" data-h></div>'+
       '<div class="chart"><div class="bars" data-b></div><div class="lbl" data-l></div></div>'+
       '<div class="ctrl"><button data-d="-5">−5</button><button data-d="-1">−1</button><span class="line" data-v></span><button data-d="1">+1</button><button data-d="5">+5</button>'+
-      '<button data-o="1" aria-pressed="true">Powyżej</button><button data-o="0" aria-pressed="false">Poniżej</button><span class="hits" data-h></span></div>';
+      '<button data-o="1" aria-pressed="true">Powyżej</button><button data-o="0" aria-pressed="false">Poniżej</button></div>';
     var st={v:[],line:0,over:true,title:''};
     function render(){
       var v=st.v, m=mean(v), sd=Math.sqrt(mean(v.map(function(x){return (x-m)*(x-m)})))||1;
@@ -668,12 +682,17 @@ h1{font-size:44px;line-height:1.02}
       $('[data-v]',el).textContent=st.line.toFixed(1);
       $('[data-t]',el).textContent=st.title;
       var pl=$('[data-p]',el); pl.textContent=(st.over?'POWYŻEJ ':'PONIŻEJ ')+st.line.toFixed(1); pl.classList.toggle('under',!st.over);
-      $('[data-h]',el).textContent=hits+'/'+v.length+' meczów, średnia '+m.toFixed(1);
+      var S=st.all, cap;
+      if(S&&S.length){
+        var ha=S.filter(function(x){return st.over?x>st.line:x<st.line}).length;
+        cap='Średnia sezonu: <b>'+mean(S).toFixed(1)+'</b> ('+S.length+' meczów) · średnia z '+v.length+' ostatnich: <b>'+m.toFixed(1)+'</b><br>Linia '+(st.over?'powyżej ':'poniżej ')+st.line.toFixed(1)+' siadła w <b>'+Math.round(ha/S.length*100)+'%</b> meczów sezonu ('+ha+'/'+S.length+') i w <b>'+hits+'/'+v.length+'</b> ostatnich';
+      } else cap='Średnia z ostatnich '+v.length+' meczów: <b>'+m.toFixed(1)+'</b> · '+hits+'/'+v.length+' '+(st.over?'powyżej':'poniżej')+' linii (średnia sezonu pojawi się po aktualizacji danych)';
+      $('[data-h]',el).innerHTML=cap;
       el.querySelectorAll('[data-o]').forEach(function(b){b.setAttribute('aria-pressed',(b.dataset.o==='1')===st.over)});
     }
     el.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){st.line=Math.max(0.5,st.line+Number(b.dataset.d));render()}});
     el.querySelectorAll('[data-o]').forEach(function(b){b.onclick=function(){st.over=b.dataset.o==='1';render()}});
-    return {set:function(title,v){st.title=title;st.v=v;st.line=Math.round(mean(v))+0.5;render()}};
+    return {set:function(title,v,all){st.title=title;st.v=v;st.all=all||null;st.line=Math.round(mean(v))+0.5;render()}};
   }
   var c1=Chart($('#c1')), c2=Chart($('#c2'));
 
@@ -749,7 +768,7 @@ h1{font-size:44px;line-height:1.02}
   var side1=0;
   function drawTotal(){
     var a=ta.value, b=tb.value, k=side1?b:a, tm=T[k]; if(!tm) return;
-    c1.set('Suma punktów meczu ('+k+')',tm.p.map(function(x,i){return x+tm.o[i]}));
+    c1.set('Suma punktów meczu ('+k+')',tm.p.map(function(x,i){return x+tm.o[i]}),(tm.pa&&tm.oa)?tm.pa.map(function(x,i){return x+tm.oa[i]}):null);
     $('#sw1').innerHTML='<button type="button" data-s="0" aria-pressed="'+(!side1)+'">Mecze '+a+'</button><button type="button" data-s="1" aria-pressed="'+(!!side1)+'">Mecze '+b+'</button>';
   }
   $('#sw1').onclick=function(e){var bt=e.target.closest('button'); if(!bt) return; side1=Number(bt.dataset.s); drawTotal()};
@@ -757,7 +776,7 @@ h1{font-size:44px;line-height:1.02}
   function drawTeam(){
     var a=ta.value, b=tb.value, k=side?b:a, tm=T[k]; if(!tm) return;
     $('#h2team').textContent='Punkty drużyny: '+tm.n;
-    c2.set(k+' – punkty',tm.p);
+    c2.set(k+' – punkty',tm.p,tm.pa||null);
     $('#sw').innerHTML='<button type="button" data-s="0" aria-pressed="'+(!side)+'">'+a+'</button><button type="button" data-s="1" aria-pressed="'+(!!side)+'">'+b+'</button>';
   }
   $('#sw').onclick=function(e){var bt=e.target.closest('button'); if(!bt) return; side=Number(bt.dataset.s); drawTeam()};
@@ -772,13 +791,7 @@ h1{font-size:44px;line-height:1.02}
     drawTotal(); fillPicks();
     drawTeam();
     
-    var hh=H[[a,b].sort().join('-')], el=$('#h2h');
-    if(!hh){el.innerHTML='<span class="mute">Brak danych H2H dla tej pary w prototypie.</span>'}
-    else{
-      el.innerHTML=hh.map(function(g){var aw=g[2]>g[4];
-        return '<div class="r"><span class="mute">'+g[0]+'</span><span class="num"><span class="'+(aw?'w':'')+'">'+g[1]+' '+g[2]+'</span> – <span class="'+(aw?'':'w')+'">'+g[4]+' '+g[3]+'</span></span><span class="mute">suma '+(g[2]+g[4])+'</span></div>'}).join('')+
-        '<div class="mute">Średnia suma H2H: '+mean(hh.map(function(g){return g[2]+g[4]})).toFixed(1)+' pkt</div>';
-    }
+    renderH2H(a,b);
     lineup(a,$('#lineA'),'#la'); lineup(b,$('#lineB'),'#lb');
     if(window.__sug) window.__sug(a,b);
     renderNext(a);
@@ -792,6 +805,28 @@ h1{font-size:44px;line-height:1.02}
     return d>=0?d:null;
   }
   function restHtml(k){var r=restOf(k); return r===null?'':(r===0?'<span class="b2b">Back-to-back</span>':'<span class="restn">Odpoczynek: '+r+' '+(r===1?'dzień':'dni')+'</span>')}
+  function eh(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+  function renderH2H(a,b){
+    var el=$('#h2h'); if(!el) return;
+    var key=[a,b].sort().join('-'), hh=H[key], tp=(H._top||{})[key];
+    if(!hh||!hh.length){el.innerHTML='<span class="mute">Brak danych H2H dla tej pary.</span>'; return}
+    var h='<div class="g3">'+hh.map(function(g){var aw=g[2]>g[4]; return '<div class="r"><span class="mute">'+g[0]+'</span><span class="num"><span class="'+(aw?'w':'')+'">'+g[1]+' '+g[2]+'</span> – <span class="'+(aw?'':'w')+'">'+g[4]+' '+g[3]+'</span></span><span class="mute">suma '+(g[2]+g[4])+'</span></div>'}).join('')+'</div>';
+    if(tp&&tp[a]&&tp[b]){
+      h+='<div class="mute" style="margin:10px 0 4px">Średnio punktów w tych meczach: <b style="color:var(--text)">'+a+' '+tp[a].avg+'</b> – <b style="color:var(--text)">'+tp[b].avg+' '+b+'</b> (suma '+(tp[a].avg+tp[b].avg).toFixed(1)+'). Top 3 graczy obecnych składów w tych meczach (średnie):</div>';
+      h+='<table class="top3"><thead><tr><th></th><th>Punkty</th><th>Zbiórki</th><th>Asysty</th></tr></thead><tbody>';
+      [a,b].forEach(function(tm){
+        for(var i=0;i<3;i++){
+          h+='<tr'+(i===0?' class="tm"':'')+'><td class="tn">'+(i===0?tm:'')+'</td>';
+          ['pts','reb','ast'].forEach(function(k){var e=(tp[tm][k]||[])[i]; h+='<td>'+(e?'<b style="color:var(--hit);margin-right:6px">'+e[1].toFixed(1)+'</b>'+eh(e[0]):'–')+'</td>'});
+          h+='</tr>';
+        }
+      });
+      h+='</tbody></table>';
+    } else {
+      h+='<div class="mute" style="margin-top:8px">Średnia suma H2H: '+(hh.reduce(function(s,g){return s+g[2]+g[4]},0)/hh.length).toFixed(1)+' pkt. Top 3 graczy w H2H pojawi się po aktualizacji danych.</div>';
+    }
+    el.innerHTML=h;
+  }
   function etDate(ts){return new Date(Date.parse(ts)-5*36e5).toISOString().slice(0,10)}
   function renderNext(a){
     var box=$('#nextList'), hd=$('#nextDate'); if(!box) return;
