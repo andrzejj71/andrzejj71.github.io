@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Panel NBA – prototyp</title>
+<title>NBA - Stats</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@500;600&display=swap">
 <style>
 :root{--bg:#111111;--card:#1c1c1c;--line:#333333;--text:#ffffff;--mute:#c6c6c6;--hit:#3dffa0;--miss:#ff6b6b;--gold:#ffffff;--violet:#e60023;color-scheme:dark;
@@ -119,13 +119,19 @@ h1{font-size:44px;line-height:1.02}
 .slipform input:focus-visible,.slipform select:focus-visible{outline:2px solid var(--violet);outline-offset:1px}
 @media (max-width:1300px){.slipform{grid-template-columns:1fr 1fr}.slipform #slAdd{grid-column:1/-1}}
 .tp td .x{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:8px;width:28px;height:28px;cursor:pointer}
-#p2 .cavg{font-size:13px;color:var(--text);margin:-2px 0 8px;font-weight:600}
+#p2 .cavg{font-size:14px;color:var(--text);margin:8px 0 0;font-weight:600;text-align:left;line-height:1.5}
 #p2 .g3{display:grid;gap:8px}
 .modes{display:flex;gap:8px;margin:12px 0 0;flex-wrap:wrap}
 .modes button:not(.addp){background:transparent;color:var(--text);border:1.5px solid var(--line);border-radius:10px;padding:8px 20px;font:700 15px Barlow,sans-serif;cursor:pointer}
 .modes button[aria-pressed="true"]{background:var(--violet);border-color:var(--violet);color:#fff}
 .modes button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 #p2 .cavg b{color:var(--text)}
+#p2 .stat{flex-wrap:nowrap;min-height:0;align-items:center;margin:6px 0 10px}
+#p2 .chead{flex:1;min-width:0}
+#p2 .trow{display:flex;align-items:flex-start;gap:10px;flex-wrap:nowrap}
+#p2 .trow .pill{flex:0 0 auto;white-space:nowrap;font-size:16px;padding:1px 8px;margin-top:2px}
+#p2 .stat .big{font-size:22px;line-height:1.15;min-width:0}
+#p2 .stat .ring{flex:0 0 auto}
 .tabbar{display:flex;gap:8px;margin:0 0 16px}
 .tabbar button{background:transparent;color:var(--text);border:1.5px solid var(--line);border-radius:999px;padding:10px 22px;font:700 16px Barlow,sans-serif;cursor:pointer}
 .tabbar button[aria-selected="true"]{background:var(--gold);border-color:var(--gold);color:var(--bg)}
@@ -300,11 +306,7 @@ h1{font-size:44px;line-height:1.02}
   </div>
 </section>
 <section class="card" id="topCard"><h2 class="sugh">Top 3 obu drużyn</h2><small class="mute">Średnie z ostatnich meczów w danych: punkty, zbiórki i asysty. ⚠ = nie zagrał w ostatnim meczu drużyny. Kliknij gracza, żeby otworzyć jego kartę na tej statystyce.</small><div id="topBox" style="overflow-x:auto"></div></section>
-<section class="card" id="slipCard"><h2 class="sugh">Mój kupon</h2><small class="mute">Wybierz gracza, statystykę i swoją linię (np. Giannis, Punkty, 24.5), a strona policzy szansę każdego typu i całego kuponu. Linię możesz też ustawić na karcie gracza i kliknąć „+ Kupon”. Szanse liczone są z ostatnich meczów gracza, bez korekt na rywala.</small>
-<div class="slipform"><input id="slName" list="slPlayers" placeholder="Gracz, np. Giannis" autocomplete="off" aria-label="Gracz"><datalist id="slPlayers"></datalist>
-<select id="slStat" aria-label="Statystyka"><option value="pts">Punkty</option><option value="reb">Zbiórki</option><option value="ast">Asysty</option><option value="tpm">Rzuty za 3</option><option value="pr">Pkt+Zb</option><option value="pa">Pkt+As</option><option value="ra">Zb+As</option><option value="pra">Pkt+Zb+As</option></select>
-<input id="slLine" type="number" step="0.5" min="0" placeholder="Linia" aria-label="Linia"><select id="slDir" aria-label="Kierunek"><option value="o">Powyżej</option><option value="u">Poniżej</option></select><button type="button" class="ld" id="slAdd">Dodaj</button></div>
-<div class="mute" id="slMsg" style="font-size:12px;min-height:16px"></div>
+<section class="card" id="slipCard"><h2 class="sugh">Mój kupon</h2><small class="mute">Typy dodajesz przyciskiem „+ Kupon” na karcie gracza: wybierz zakładkę (statystykę), ustaw linię przyciskami −1 i +1 oraz kierunek (Powyżej lub Poniżej). Szanse liczone są z ostatnich meczów gracza, bez korekt na rywala.</small>
 <div style="overflow-x:auto"><table class="tp"><thead><tr><th>Gracz</th><th>Typ</th><th>Szansa</th><th></th></tr></thead><tbody id="slBody"></tbody></table></div>
 <div id="slSum" class="slips"></div><button type="button" class="ld" id="slClear">Wyczyść kupon</button></section>
 
@@ -542,14 +544,6 @@ h1{font-size:44px;line-height:1.02}
     $('slSum').innerHTML=cnt?'<div class="slipt"><span>Łączna szansa kuponu ('+cnt+' '+(cnt===1?'typ':'typów')+')</span><b>'+(prod*100).toFixed(1)+'%</b></div><div class="mute">Kurs sprawiedliwy ok. '+(1/prod).toFixed(2)+'. Szansa kuponu spada z każdym dodanym typem.</div>':'';
   }
   $('slBody').addEventListener('click',function(e){var b=e.target.closest('.x'); if(!b) return; slip2.splice(+b.dataset.i,1); saveSlip(); renderSlip()});
-  $('slName').addEventListener('focus',function(){var dl=$('slPlayers'); if(dl.children.length===P.length) return; dl.innerHTML=''; P.forEach(function(p){var o=document.createElement('option'); o.value=p.n; dl.appendChild(o)})});
-  $('slAdd').onclick=function(){
-    var msg=$('slMsg'), p=findP($('slName').value), k=$('slStat').value, line=parseFloat($('slLine').value);
-    if(!p){msg.textContent='Nie znaleziono gracza w wczytanych danych.'; return}
-    if(isNaN(line)){msg.textContent='Wpisz linię, np. 24.5.'; return}
-    if(!(p.s[k]||comboOf(p,k))){msg.textContent='Brak danych tego gracza dla wybranej statystyki.'; return}
-    msg.textContent=''; addLeg(p,k,line,$('slDir').value==='o'); $('slLine').value='';
-  };
   $('addSlip').onclick=function(){addLeg(pl,key,line,over); var b=this; b.textContent='Dodano ✓'; setTimeout(function(){b.textContent='+ Kupon'},1200)};
   $('slClear').onclick=function(){slip2=[]; saveSlip(); renderSlip()};
   renderSlip();
@@ -663,7 +657,7 @@ h1{font-size:44px;line-height:1.02}
 
   function Chart(el){
     el.className='box';
-    el.innerHTML='<div class="stat"><span class="big" data-t></span><span class="pill" data-p></span><div class="ring" data-r><span data-c></span></div></div><div class="cavg" data-h></div>'+
+    el.innerHTML='<div class="stat"><div class="chead"><div class="trow"><span class="big" data-t></span><span class="pill" data-p></span></div><div class="cavg" data-h></div></div><div class="ring" data-r><span data-c></span></div></div>'+
       '<div class="chart"><div class="bars" data-b></div><div class="lbl" data-l></div></div>'+
       '<div class="ctrl"><button data-d="-5">−5</button><button data-d="-1">−1</button><span class="line" data-v></span><button data-d="1">+1</button><button data-d="5">+5</button>'+
       '<button data-o="1" aria-pressed="true">Powyżej</button><button data-o="0" aria-pressed="false">Poniżej</button></div>';
@@ -682,12 +676,8 @@ h1{font-size:44px;line-height:1.02}
       $('[data-v]',el).textContent=st.line.toFixed(1);
       $('[data-t]',el).textContent=st.title;
       var pl=$('[data-p]',el); pl.textContent=(st.over?'POWYŻEJ ':'PONIŻEJ ')+st.line.toFixed(1); pl.classList.toggle('under',!st.over);
-      var S=st.all, cap;
-      if(S&&S.length){
-        var ha=S.filter(function(x){return st.over?x>st.line:x<st.line}).length;
-        cap='Średnia sezonu: <b>'+mean(S).toFixed(1)+'</b> ('+S.length+' meczów) · średnia z '+v.length+' ostatnich: <b>'+m.toFixed(1)+'</b><br>Linia '+(st.over?'powyżej ':'poniżej ')+st.line.toFixed(1)+' siadła w <b>'+Math.round(ha/S.length*100)+'%</b> meczów sezonu ('+ha+'/'+S.length+') i w <b>'+hits+'/'+v.length+'</b> ostatnich';
-      } else cap='Średnia z ostatnich '+v.length+' meczów: <b>'+m.toFixed(1)+'</b> · '+hits+'/'+v.length+' '+(st.over?'powyżej':'poniżej')+' linii (średnia sezonu pojawi się po aktualizacji danych)';
-      $('[data-h]',el).innerHTML=cap;
+      var S=st.all, hasS=S&&S.length;
+      $('[data-h]',el).innerHTML='<div>Średnia sezonu: <b>'+(hasS?mean(S).toFixed(1):'–')+'</b>'+(hasS?'':' <span class="mute">(po aktualizacji danych)</span>')+'</div><div>Średnia '+v.length+' meczów: <b>'+m.toFixed(1)+'</b></div>';
       el.querySelectorAll('[data-o]').forEach(function(b){b.setAttribute('aria-pressed',(b.dataset.o==='1')===st.over)});
     }
     el.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){st.line=Math.max(0.5,st.line+Number(b.dataset.d));render()}});
