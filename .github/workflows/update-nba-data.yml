@@ -3,8 +3,8 @@ name: Aktualizacja statystyk NBA
 on:
   workflow_dispatch:
   schedule:
-    # Codziennie po porannym odświeżeniu danych (UTC).
-    - cron: "17 12 * * *"
+    # Sprawdzaj co 15 minut, czy ESPN oznaczył nowy mecz jako zakończony.
+    - cron: "7,22,37,52 * * * *"
 
 permissions:
   contents: write
@@ -36,13 +36,14 @@ jobs:
       - name: Zaktualizuj dane NBA
         env:
           DUNKAPI_API_KEY: ${{ secrets.DUNKAPI_API_KEY }}
+          FORCE_NBA_UPDATE: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
         run: python nba.py
 
       - name: Zapisz nowe dane i zdjęcia w repozytorium
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add nba_data.json img/
+          git add nba_data.json nba_processed_games.json img/
           if git diff --cached --quiet; then
             echo "Brak zmian do zapisania."
           else
