@@ -491,8 +491,104 @@ def step_images():
         print()
     print(f"Gotowe. Graczy: {len(players)}, drużyn: {len(teams)}, niepobranych: {failed}.")
 
+
+# ---- AUTOMATYCZNE WYKRYWANIE ZAKOŃCZONYCH MECZÓW ----
+SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
+PROCESSED_GAMES_FILE = "nba_processed_games.json"
+
+
+def newly_finished_games():
+    """Zwraca zakończone mecze z ostatnich dni, których jeszcze nie przetwarzaliśmy."""
+    today = datetime.utcnow().date()
+    dates = [(today + timedelta(days=offset)).strftime("%Y%m%d") for offset in (-2, -1, 0, 1)]
+    found = {}
+    for day in dates:
+        try:
+            response = requests.get(
+                SCOREBOARD_URL,
+                params={"dates": day},
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=25,
+            )
+            response.raise_for_status()
+            payload = response.json()
+            for event in payload.get("events", []):
+                status = (event.get("status") or {}).get("type") or {}
+                if status.get("completed") is True or status.get("state") == "post":
+                    event_id = str(event.get("id") or "")
+                    if event_id:
+                        found[event_id] = {
+                            "id": event_id,
+                            "name": event.get("name", ""),
+                            "date": event.get("date", ""),
+                        }
+        except Exception as exc:
+            print(f"Nie udało się sprawdzić wyników ESPN dla {day}: {exc}")
+            raise RuntimeError("Nie można wiarygodnie sprawdzić, czy zakończył się mecz. Pomijam aktualizację.")
+    return found
+
+
+def should_update_after_game():
+    """Na harmonogramie uruchamia pełne pobieranie wyłącznie po nowym meczu końcowym."""
+    if os.getenv("FORCE_NBA_UPDATE") == "1":
+        print("Wymuszona aktualizacja (workflow_dispatch).")
+        return True, {}
+
+    finished = newly_finished_games()
+    marker = Path(__file__).resolve().parent / PROCESSED_GAMES_FILE
+    try:
+        previous = json.loads(marker.read_text(encoding="utf-8")) if marker.exists() else {}
+    except Exception:
+        previous = {}
+    processed = set(previous.get("ids", [])) if isinstance(previous, dict) else set()
+    new_games = {gid: game for gid, game in finished.items() if gid not in processed}
+    if not new_games:
+        print("Brak nowych zakończonych meczów NBA. Pomijam pobieranie statystyk.")
+        return False, {}
+    print("Wykryto nowe zakończone mecze:")
+    for game in new_games.values():
+        print(f" - {game.get('name') or game['id']} ({game.get('date', '')})")
+    return True, finished
+
+
+def save_processed_games(finished):
+    """Zapisuje identyfikatory dopiero po udanym wygenerowaniu nba_data.json."""
+    marker = Path(__file__).resolve().parent / PROCESSED_GAMES_FILE
+    old = {}
+    if marker.exists():
+        try:
+            old = json.loads(marker.read_text(encoding="utf-8"))
+        except Exception:
+            old = {}
+    ids = set(old.get("ids", [])) if isinstance(old, dict) else set()
+    ids.update(finished.keys())
+    # Ogranicz plik do ostatnich 14 dni, ale zostaw wszystkie bieżąco wykryte ID.
+    cutoff = datetime.utcnow() - timedelta(days=14)
+    recent = {}
+    for gid, game in finished.items():
+        try:
+            if game.get("date") and datetime.fromisoformat(game["date"].replace("Z", "+00:00")).replace(tzinfo=None) >= cutoff:
+                recent[gid] = game
+            else:
+                recent[gid] = game
+        except Exception:
+            recent[gid] = game
+    ids.update(recent.keys())
+    payload = {"ids": sorted(ids)[-500:], "updated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z"}
+    temp = marker.with_suffix(".tmp")
+    temp.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    temp.replace(marker)
+
 def main():
     here = Path(__file__).resolve().parent
+    try:
+        should_run, finished_games = should_update_after_game()
+    except Exception as exc:
+        print(f"Kontrola zakończonych meczów nie powiodła się: {exc}")
+        sys.exit(0)
+    if not should_run:
+        return
+
     work = Path(tempfile.mkdtemp(prefix="nba_"))
     os.chdir(work)
     ok = {}
@@ -552,6 +648,8 @@ def main():
     temp_json.write_text(output, encoding="utf-8")
     temp_json.replace(here / "nba_data.json")
     print(f"\nZapisano nba_data.json (graczy: {len(data['players'])}, drużyn: {len(data['teams'])}).")
+    if finished_games:
+        save_processed_games(finished_games)
 
     print("\n=== Zdjęcia i loga ===")
     try:
