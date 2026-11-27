@@ -3,7 +3,7 @@ name: Aktualizacja statystyk NBA
 on:
   workflow_dispatch:
   schedule:
-    # Codziennie po porannym odświeżeniu danych NBA/DunkAPI (UTC).
+    # Codziennie po porannym odświeżeniu danych (UTC).
     - cron: "17 12 * * *"
 
 permissions:
